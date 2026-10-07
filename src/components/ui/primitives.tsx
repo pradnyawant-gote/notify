@@ -181,6 +181,7 @@ export function Input({
         <Text style={{ fontWeight: '500', fontSize: 13 }}>{label}</Text>
       )}
       <TextInput
+        maxFontSizeMultiplier={1.4}
         accessibilityLabel={label}
         placeholderTextColor={c.muted}
         style={[

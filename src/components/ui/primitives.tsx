@@ -1,7 +1,7 @@
+import { Pressable } from './pressable';
 import React from 'react';
 import {
   View,
-  Pressable,
   TextInput,
   type TextInputProps,
   type ViewStyle,
@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import type { LucideIcon } from 'lucide-react-native';
 import { Text } from './text';
-import { useTheme } from '../../theme';
+import { systemFont, useTheme } from '../../theme';
 export function Card({
   children,
   style,
@@ -193,7 +193,7 @@ export function Input({
             paddingVertical: 12,
             minHeight: 48,
             fontWeight: '400',
-            fontFamily: 'System',
+            fontFamily: systemFont,
             fontSize: 15,
             color: c.ink,
           },

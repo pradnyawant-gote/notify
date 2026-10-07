@@ -1,8 +1,8 @@
+import { Pressable } from './ui/pressable';
 import React from 'react';
 import {
   View,
   ScrollView,
-  Pressable,
   KeyboardAvoidingView,
   Platform,
   useWindowDimensions,
@@ -12,6 +12,7 @@ import { X } from 'lucide-react-native';
 import { useTheme } from '../theme';
 import { Heading, IconButton, Row } from './ui/primitives';
 import { Text } from './ui/text';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export function Sheet({
   title,
   description,
@@ -26,6 +27,7 @@ export function Sheet({
   const router = useRouter(),
     { colors: c } = useTheme(),
     { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const close =
     onClose ??
     (() => (router.canGoBack() ? router.back() : router.replace('/')));
@@ -81,7 +83,10 @@ export function Sheet({
         </Row>
         <ScrollView
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ padding: 24 }}
+          contentContainerStyle={{
+            padding: 24,
+            paddingBottom: 24 + insets.bottom,
+          }}
           showsVerticalScrollIndicator={false}
         >
           {children}

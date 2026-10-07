@@ -1,5 +1,6 @@
+import { Pressable } from '../components/ui/pressable';
 import React, { useEffect, useState } from 'react';
-import { View, Pressable, useWindowDimensions } from 'react-native';
+import { View, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ArrowRight,
@@ -16,7 +17,11 @@ import {
 } from 'lucide-react-native';
 import type { Activity } from '../domain/types';
 import { useClock, useStore } from '../store/provider';
-import { activitiesForDate, activityStatus } from '../domain/activities';
+import {
+  activitiesForDate,
+  activityStatus,
+  nextActionableActivity,
+} from '../domain/activities';
 import {
   addDays,
   dateKey,
@@ -29,11 +34,10 @@ import { useTheme } from '../theme';
 import { Text } from '../components/ui/text';
 import { Button } from '../components/ui/button';
 import { Card, Heading, IconButton, Row } from '../components/ui/primitives';
-import { MetricCard } from '../components/metric-card';
+import { MetricGrid } from '../components/metric-grid';
 import { OverviewChart } from '../components/overview-chart';
 import { Timeline } from '../components/timeline';
 import { REMINDER_POLICY } from '../domain/reminders';
-
 function NextActivityCard({
   activity,
   date,
@@ -47,20 +51,51 @@ function NextActivityCard({
 }) {
   const { colors: c } = useTheme(),
     router = useRouter();
+  const status = activity
+    ? activityStatus(activity, date, now.getTime())
+    : null;
+  const statusColor =
+    status === 'missed'
+      ? c.peachInk
+      : status === 'current'
+        ? c.lavenderInk
+        : activity
+          ? c.blueInk
+          : c.success;
+  const statusBackground =
+    status === 'missed'
+      ? c.peach
+      : status === 'current'
+        ? c.lavender
+        : activity
+          ? c.blue
+          : c.successBg;
   return (
     <Card style={{ gap: compact ? 8 : 15, padding: 18 }}>
       <Row style={{ justifyContent: 'space-between' }}>
-        <Text style={{ fontWeight: '600', fontSize: 14 }}>Next activity</Text>
+        <Text style={{ fontWeight: '600', fontSize: 14 }}>
+          {status === 'missed'
+            ? 'Needs your attention'
+            : status === 'current'
+              ? 'Happening now'
+              : 'Next activity'}
+        </Text>
         <View
           style={{
-            backgroundColor: c.blue,
+            backgroundColor: statusBackground,
             borderRadius: 7,
             paddingHorizontal: 7,
             paddingVertical: 3,
           }}
         >
-          <Text style={{ fontSize: 10, lineHeight: 14, color: c.blueInk }}>
-            {activity ? 'Upcoming' : 'All clear'}
+          <Text style={{ fontSize: 10, lineHeight: 14, color: statusColor }}>
+            {status === 'missed'
+              ? 'Unfinished'
+              : status === 'current'
+                ? 'In progress'
+                : activity
+                  ? 'Upcoming'
+                  : 'All clear'}
           </Text>
         </View>
       </Row>
@@ -72,6 +107,7 @@ function NextActivityCard({
           {compact ? (
             <Row style={{ justifyContent: 'space-between' }}>
               <Text style={{ fontSize: 12, color: c.muted }}>
+                {status === 'missed' ? 'Planned for ' : ''}
                 {formatTime(activity.time)} · {durationLabel(activity.duration)}
               </Text>
               <Pressable
@@ -137,14 +173,15 @@ function NextActivityCard({
     </Card>
   );
 }
-
 export default function TodayScreen() {
   const { state, hydrated, enterDemo, toggleComplete } = useStore(),
     now = useClock(),
     { colors: c } = useTheme(),
     { width } = useWindowDimensions(),
     router = useRouter(),
-    params = useLocalSearchParams<{ demo?: string }>();
+    params = useLocalSearchParams<{
+      demo?: string;
+    }>();
   const today = dateKey(now),
     [selectedDate, setSelectedDate] = useState(today),
     [filter, setFilter] = useState('All activities');
@@ -162,9 +199,7 @@ export default function TodayScreen() {
   const personalMinutes = day
     .filter((a) => !['work', 'study'].includes(a.category))
     .reduce((sum, a) => sum + a.duration, 0);
-  const next = day.find(
-      (a) => activityStatus(a, today, now.getTime()) === 'upcoming',
-    ),
+  const next = nextActionableActivity(day, today, now.getTime()),
     habits = day.filter((a) => a.type === 'habit'),
     wide = width >= 1180;
   const filtered = activitiesForDate(state.activities, selectedDate).filter(
@@ -183,15 +218,28 @@ export default function TodayScreen() {
   return (
     <View style={{ gap: 20 }}>
       <Row style={{ justifyContent: 'space-between', gap: 10 }}>
-        <View style={{ gap: 5, flex: 1 }}>
-          <Heading size={width < 600 ? 22 : 27}>
+        <View style={{ gap: 4, flex: 1, minWidth: 0 }}>
+          <Text style={{ fontSize: 14, lineHeight: 20, color: c.muted }}>
             {now.getHours() < 12
               ? 'Good morning'
               : now.getHours() < 17
                 ? 'Good afternoon'
                 : 'Good evening'}
-            , {state.preferences.name}
-          </Heading>
+          </Text>
+          <Text
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.85}
+            maxFontSizeMultiplier={1.3}
+            style={{
+              fontSize: width < 600 ? 24 : 28,
+              lineHeight: 34,
+              fontWeight: '600',
+              letterSpacing: -0.5,
+            }}
+          >
+            {state.preferences.name}
+          </Text>
           <Text style={{ color: c.muted, fontSize: 12 }}>
             {now.toLocaleDateString('en-US', {
               weekday: 'long',
@@ -237,44 +285,51 @@ export default function TodayScreen() {
         }}
       >
         <View style={{ flex: 1, width: '100%', gap: 14 }}>
-          <View style={{ gap: 10 }}>
-            <Row style={{ gap: 10, alignItems: 'stretch' }}>
-              <MetricCard
-                label="Daily progress"
-                value={`${completed} / ${day.length}`}
-                note={`${day.length ? Math.round((completed / day.length) * 100) : 0}%`}
-                tone="blue"
-                icon={TrendingUp}
-                onPress={() => router.push('/insights')}
-              />
-              <MetricCard
-                label="Focus time"
-                value={`${focusMinutes} min`}
-                note={`${focusSessions.length} ${focusSessions.length === 1 ? 'session' : 'sessions'}`}
-                tone="black"
-                icon={Timer}
-                onPress={() => router.push('/focus')}
-              />
-            </Row>
-            <Row style={{ gap: 10, alignItems: 'stretch' }}>
-              <MetricCard
-                label="Remaining"
-                value={String(day.length - completed)}
-                note="activities"
-                tone="black"
-                icon={Clock3}
-                onPress={() => setFilter('All activities')}
-              />
-              <MetricCard
-                label="Personal time"
-                value={durationLabel(personalMinutes)}
-                note="today"
-                tone="blue"
-                icon={CalendarDays}
-                onPress={() => setFilter('Personal')}
-              />
-            </Row>
-          </View>
+          <MetricGrid
+            items={[
+              {
+                key: 'progress',
+                label: 'Daily progress',
+                value: completed + ' / ' + day.length,
+                note:
+                  (day.length
+                    ? Math.round((completed / day.length) * 100)
+                    : 0) + '% complete',
+                tone: 'blue',
+                icon: TrendingUp,
+                onPress: () => router.push('/insights'),
+              },
+              {
+                key: 'focus',
+                label: 'Focus time',
+                value: focusMinutes + ' min',
+                note:
+                  focusSessions.length +
+                  (focusSessions.length === 1 ? ' session' : ' sessions'),
+                tone: 'black',
+                icon: Timer,
+                onPress: () => router.push('/focus'),
+              },
+              {
+                key: 'remaining',
+                label: 'Remaining',
+                value: String(day.length - completed),
+                note: 'Activities left',
+                tone: 'black',
+                icon: Clock3,
+                onPress: () => setFilter('All activities'),
+              },
+              {
+                key: 'personal',
+                label: 'Personal time',
+                value: durationLabel(personalMinutes),
+                note: 'Planned today',
+                tone: 'blue',
+                icon: CalendarDays,
+                onPress: () => setFilter('Personal'),
+              },
+            ]}
+          />
           {!wide && (
             <NextActivityCard activity={next} date={today} now={now} compact />
           )}

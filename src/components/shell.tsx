@@ -1,5 +1,6 @@
+import { Pressable } from './ui/pressable';
 import React, { useEffect, useRef } from 'react';
-import { View, ScrollView, Pressable, useWindowDimensions } from 'react-native';
+import { View, ScrollView, useWindowDimensions } from 'react-native';
 import { usePathname, useRouter } from 'expo-router';
 import {
   Sun,
@@ -23,6 +24,7 @@ import { Button } from './ui/button';
 import { IconButton, Label, Row } from './ui/primitives';
 import { useTheme } from '../theme';
 import { useClock, useStore } from '../store/provider';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const nav: {
   label: string;
   route: '/' | '/calendar' | '/insights' | '/profile';
@@ -41,7 +43,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
     path = usePathname(),
     { state, toast } = useStore(),
     now = useClock();
-  const current = nav.find((n) => n.route === path)?.label ?? 'Routines';
+  const insets = useSafeAreaInsets();
+  const lastPage = useRef('Today');
+  const page =
+    nav.find((n) => n.route === path)?.label ??
+    (path === '/routines' ? 'Routines' : null);
+  if (page) lastPage.current = page;
+  const current = page ?? lastPage.current;
   const scroll = useRef<ScrollView>(null);
   useEffect(() => {
     scroll.current?.scrollTo({ y: 0, animated: false });
@@ -238,7 +246,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <View style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
         <View
           style={{
-            minHeight: desktop ? 68 : 52,
+            minHeight: desktop ? 68 : 56,
+            flexShrink: 0,
             borderBottomWidth: 1,
             borderColor: c.border,
             paddingHorizontal: desktop ? 28 : 16,
@@ -255,12 +264,35 @@ export function Shell({ children }: { children: React.ReactNode }) {
               <Text style={{ fontSize: 13, fontWeight: '500' }}>{current}</Text>
             </Row>
           ) : (
-            <Row style={{ gap: 6 }}>
+            <Row style={{ gap: 6, width: 92, flexShrink: 0 }}>
               <Brand compact />
-              <Text style={{ fontSize: 12, color: c.primary }}>DayFlow</Text>
+              <Text
+                maxFontSizeMultiplier={1.2}
+                style={{ fontSize: 12, color: c.primary }}
+              >
+                DayFlow
+              </Text>
             </Row>
           )}
-          <Row style={{ gap: 16 }}>
+          {!desktop && (
+            <View style={{ flex: 1, minWidth: 0, alignItems: 'center' }}>
+              <Text
+                numberOfLines={1}
+                maxFontSizeMultiplier={1.2}
+                style={{ fontSize: 16, fontWeight: '600' }}
+              >
+                {current === 'Today' ? 'Overview' : current}
+              </Text>
+            </View>
+          )}
+          <Row
+            style={{
+              gap: 16,
+              width: desktop ? undefined : 92,
+              justifyContent: 'flex-end',
+              flexShrink: 0,
+            }}
+          >
             {desktop && (
               <Text style={{ fontSize: 12, color: c.muted }}>
                 {now.toLocaleDateString('en-US', {
@@ -282,21 +314,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
               filled={desktop}
             />
           </Row>
-          {!desktop && (
-            <View
-              pointerEvents="none"
-              style={{
-                position: 'absolute',
-                left: 105,
-                right: 105,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ fontSize: 15, fontWeight: '600' }}>
-                {current === 'Today' ? 'Overview' : current}
-              </Text>
-            </View>
-          )}
         </View>
         <ScrollView
           ref={scroll}
@@ -321,8 +338,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
               backgroundColor: c.surface,
               borderTopWidth: 1,
               borderColor: c.border,
-              paddingTop: 7,
-              paddingBottom: 12,
+              flexShrink: 0,
+              paddingTop: 8,
+              paddingBottom: Math.max(insets.bottom, 12),
             }}
           >
             {[nav[0], nav[1], null, nav[2], nav[3]].map((n, i) =>
@@ -333,8 +351,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   accessibilityLabel={n.label}
                   onPress={() => router.replace(n.route)}
                   style={{
-                    minWidth: 60,
-                    minHeight: 51,
+                    flex: 1,
+                    minWidth: 0,
+                    minHeight: 52,
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: 4,
@@ -346,9 +365,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
                     color={path === n.route ? c.primary : c.muted}
                   />
                   <Text
+                    numberOfLines={1}
+                    maxFontSizeMultiplier={1.2}
                     style={{
-                      fontSize: 10,
-                      lineHeight: 14,
+                      fontSize: 11,
+                      lineHeight: 16,
                       color: path === n.route ? c.primary : c.muted,
                       fontWeight: path === n.route ? '600' : '400',
                     }}
@@ -357,22 +378,30 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   </Text>
                 </Pressable>
               ) : (
-                <Pressable
-                  key="add"
-                  accessibilityRole="button"
-                  accessibilityLabel="Add activity"
-                  onPress={() => router.push('/add')}
+                <View
                   style={{
-                    width: 46,
-                    height: 46,
-                    backgroundColor: c.primary,
-                    borderRadius: 16,
+                    flex: 1,
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                 >
-                  <Plus size={24} color={c.onPrimary} />
-                </Pressable>
+                  <Pressable
+                    key="add"
+                    accessibilityRole="button"
+                    accessibilityLabel="Add activity"
+                    onPress={() => router.push('/add')}
+                    style={{
+                      width: 46,
+                      height: 46,
+                      backgroundColor: c.primary,
+                      borderRadius: 16,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Plus size={24} color={c.onPrimary} />
+                  </Pressable>
+                </View>
               ),
             )}
           </View>
@@ -380,9 +409,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </View>
       {toast && (
         <View
-          pointerEvents="none"
           style={{
             position: 'absolute',
+            pointerEvents: 'none',
             bottom: desktop ? 24 : 92,
             left: desktop ? 250 : 20,
             right: 20,

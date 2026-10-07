@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { AccessibilityInfo, useColorScheme } from 'react-native';
+import { AccessibilityInfo, Platform, useColorScheme } from 'react-native';
 import { useStore } from './store/provider';
+export const systemFont = Platform.OS === 'android' ? 'sans-serif' : 'System';
 const light = {
   bg: '#F7F7F7',
   surface: '#FFFFFF',

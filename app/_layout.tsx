@@ -14,7 +14,7 @@ function Navigation() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: c.bg }}
-      edges={['top', 'bottom']}
+      edges={['top', 'left', 'right']}
     >
       <StatusBar style={isDark ? 'light' : 'dark'} />
       {hydrated ? (

@@ -1,5 +1,6 @@
+import { Pressable } from './ui/pressable';
 import React, { useState } from 'react';
-import { View, Pressable } from 'react-native';
+import { View } from 'react-native';
 import {
   CheckSquare,
   Bell,

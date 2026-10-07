@@ -1,7 +1,7 @@
 // Source-owned Text primitive following React Native Reusables' composition pattern.
 import React, { createContext, useContext } from 'react';
 import { Text as NativeText, type TextProps } from 'react-native';
-import { useTheme } from '../../theme';
+import { systemFont, useTheme } from '../../theme';
 export const TextClassContext = createContext<string | undefined>(undefined);
 export function Text({
   className = '',
@@ -17,7 +17,7 @@ export function Text({
       className={`${context ?? ''} ${className}`}
       style={[
         {
-          fontFamily: 'System',
+          fontFamily: systemFont,
           fontWeight: '400',
           fontSize: 14,
           lineHeight: 21,

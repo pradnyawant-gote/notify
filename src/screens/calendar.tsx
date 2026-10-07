@@ -1,5 +1,6 @@
+import { Pressable } from '../components/ui/pressable';
 import React, { useState } from 'react';
-import { View, ScrollView, Pressable, useWindowDimensions } from 'react-native';
+import { View, ScrollView, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
   CalendarDays,

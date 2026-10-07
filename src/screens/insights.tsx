@@ -28,7 +28,7 @@ import {
   Row,
   IconButton,
 } from '../components/ui/primitives';
-import { MetricCard } from '../components/metric-card';
+import { MetricGrid } from '../components/metric-grid';
 import { Timeline } from '../components/timeline';
 export default function InsightsScreen() {
   const { state, saveReview, notify, saveActivity } = useStore(),
@@ -112,43 +112,47 @@ export default function InsightsScreen() {
         ))}
       </Row>
 
-      <View style={{ gap: 10, maxWidth: 800 }}>
-        <Row style={{ gap: 10, alignItems: 'stretch' }}>
-          <MetricCard
-            label="Productivity"
-            value={percent + '%'}
-            note={done.length + ' / ' + activities.length}
-            tone="blue"
-            icon={TrendingUp}
-            onPress={() => setTab('Daily review')}
-          />
-          <MetricCard
-            label="Focus time"
-            value={Math.round(focus / 60) + ' min'}
-            note="recorded"
-            tone="black"
-            icon={Timer}
-            onPress={() => router.push('/focus')}
-          />
-        </Row>
-        <Row style={{ gap: 10, alignItems: 'stretch' }}>
-          <MetricCard
-            label="Habits"
-            value={habitDone.length + ' / ' + habits.length}
-            note="complete"
-            tone="black"
-            icon={Repeat2}
-            onPress={() => router.push('/routines')}
-          />
-          <MetricCard
-            label="Missed activities"
-            value={String(missed.length)}
-            note="today"
-            tone="blue"
-            icon={CalendarDays}
-            onPress={() => setTab('Daily review')}
-          />
-        </Row>
+      <View style={{ width: '100%', maxWidth: 800 }}>
+        <MetricGrid
+          items={[
+            {
+              key: 'productivity',
+              label: 'Productivity',
+              value: percent + '%',
+              note: done.length + ' of ' + activities.length + ' complete',
+              tone: 'blue',
+              icon: TrendingUp,
+              onPress: () => setTab('Daily review'),
+            },
+            {
+              key: 'focus',
+              label: 'Focus time',
+              value: Math.round(focus / 60) + ' min',
+              note: 'Recorded today',
+              tone: 'black',
+              icon: Timer,
+              onPress: () => router.push('/focus'),
+            },
+            {
+              key: 'habits',
+              label: 'Habits',
+              value: habitDone.length + ' / ' + habits.length,
+              note: 'Habits complete',
+              tone: 'black',
+              icon: Repeat2,
+              onPress: () => router.push('/routines'),
+            },
+            {
+              key: 'missed',
+              label: 'Missed activities',
+              value: String(missed.length),
+              note: 'Needs attention',
+              tone: 'blue',
+              icon: CalendarDays,
+              onPress: () => setTab('Daily review'),
+            },
+          ]}
+        />
       </View>
       {tab === 'Overview' && (
         <Card style={{ padding: width < 600 ? 20 : 28 }}>

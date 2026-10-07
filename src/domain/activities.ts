@@ -24,6 +24,19 @@ export function activityStatus(
   if (now >= start + a.duration * 60000) return 'missed';
   return now >= start ? 'current' : 'upcoming';
 }
+
+export function nextActionableActivity(
+  activities: Activity[],
+  date: string,
+  now: number,
+) {
+  const day = activitiesForDate(activities, date);
+  return (
+    day.find((a) => activityStatus(a, date, now) === 'current') ??
+    day.find((a) => activityStatus(a, date, now) === 'upcoming') ??
+    day.find((a) => activityStatus(a, date, now) === 'missed')
+  );
+}
 export function findGap(
   activities: Activity[],
   date: string,

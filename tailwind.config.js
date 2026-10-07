@@ -16,9 +16,6 @@ module.exports = {
       },
       fontFamily: {
         sans: ['System'],
-        medium: ['System'],
-        semibold: ['System'],
-        bold: ['System'],
       },
       borderRadius: { xl: '16px', '2xl': '18px' },
     },

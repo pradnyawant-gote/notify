@@ -1,5 +1,6 @@
+import { Pressable } from '../components/ui/pressable';
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, Pressable, useWindowDimensions } from 'react-native';
+import { View, ScrollView, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
   X,
@@ -75,7 +76,7 @@ export default function FocusScreen() {
           justifyContent: 'space-between',
         }}
       >
-        <Brand />
+        <Brand compact={width < 600} />
         <Row>
           <Text style={{ color: c.muted, fontSize: 12 }}>YOUR FOCUS SPACE</Text>
           <IconButton

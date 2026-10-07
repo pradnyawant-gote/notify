@@ -11,7 +11,7 @@ Validated on 7 October 2026 in the provided Windows workspace.
 
 ## Android Expo Go import regression
 
-The notification integration now avoids the SDK 57 barrel's remote push-token registration side effect. Five additional regression tests cover Android service loading, the installed SDK's transitive local import graph, permission/channel/category setup, queue ownership and local/focus scheduling, and completion-action cleanup. The full suite contains 15 passing tests. These checks do not substitute for physical-device delivery testing.
+The notification integration now avoids the SDK 57 barrel's remote push-token registration side effect. Five notification regression tests cover Android service loading, the installed SDK's transitive local import graph, permission/channel/category setup, queue ownership and local/focus scheduling, and completion-action cleanup. These checks do not substitute for physical-device delivery testing.
 
 An Android JavaScript export also compiles successfully. Inspection of that debug-check bundle confirms the Expo Go push-error text, push-token listener implementation, and automatic server-registration implementation are absent. The non-bytecode export is an ignored diagnostic artifact; normal application exports continue to use Hermes bytecode.
 
@@ -22,3 +22,5 @@ No cloud account, backend, push server, telemetry or external calendar access wa
 ## Mobile layout correction
 
 Five additional regression tests cover equal card widths, no overflow across phone/tablet and fractional layout measurements, larger Android font sizes, and correct selection of current/upcoming/unfinished activities. The suite contains 20 passing tests. The native card geometry is owned by static `View` styles rather than a Pressable callback, and captions are separated from values. Device validation remains necessary to confirm the final Android rendering and operating-system safe areas.
+
+The exported web application was also checked at 390×844 and 320×780 using an isolated first-day account with a long name and no completion history. At 390 pixels, all four cards measure 173×132; at 320 pixels, they stack at 288 pixels wide. Neither viewport has horizontal page overflow. Onboarding, the fixed bottom navigation, the unfinished activity card, the empty progress state, and Quick Add were checked in the browser. Web, Android, and iOS exports all pass. The preview image is saved in `artifacts/dayflow-mobile-corrected.jpg`.

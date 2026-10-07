@@ -343,7 +343,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               paddingBottom: Math.max(insets.bottom, 12),
             }}
           >
-            {[nav[0], nav[1], null, nav[2], nav[3]].map((n, i) =>
+            {[nav[0], nav[1], null, nav[2], nav[3]].map((n) =>
               n ? (
                 <Pressable
                   key={n.label}
@@ -379,6 +379,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 </Pressable>
               ) : (
                 <View
+                  key="add"
                   style={{
                     flex: 1,
                     alignItems: 'center',
@@ -386,7 +387,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   }}
                 >
                   <Pressable
-                    key="add"
                     accessibilityRole="button"
                     accessibilityLabel="Add activity"
                     onPress={() => router.push('/add')}

@@ -18,3 +18,7 @@ An Android JavaScript export also compiles successfully. Inspection of that debu
 Dependency audit was reviewed and targeted patches applied. Remaining high-severity findings originate in upstream braces and node-forge and propagate through tooling dependencies. See the README release notes. Do not use npm audit's proposed framework downgrades as an automatic fix.
 
 No cloud account, backend, push server, telemetry or external calendar access was used. All browser tests used generated example data or synthetic entries.
+
+## Mobile layout correction
+
+Five additional regression tests cover equal card widths, no overflow across phone/tablet and fractional layout measurements, larger Android font sizes, and correct selection of current/upcoming/unfinished activities. The suite contains 20 passing tests. The native card geometry is owned by static `View` styles rather than a Pressable callback, and captions are separated from values. Device validation remains necessary to confirm the final Android rendering and operating-system safe areas.
